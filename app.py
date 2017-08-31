@@ -65,7 +65,7 @@
 from flask import Flask, request
 from pymessenger import Bot
 from util import fetch_reply
-
+import requests,json
 app = Flask(__name__)
 
 
@@ -116,8 +116,58 @@ def webhook():
 						bot.send_text_message(sender_id, "Ok. I will show you help message!")
 	return "ok", 200
 
+
+
+def set_greeting_text():
+    headers = {
+        'Content-Type':'application/json'
+        }
+    data = {
+        "setting_type":"greeting",
+        "greeting":{
+            "text":"Hi {{user_first_name}}! Iam news bot"
+            }
+        }
+    ENDPOINT = "https://graph.facebook.com/v2.8/me/thread_settings?access_token=%s"%(FB_ACCESS_TOKEN)
+    r = requests.post(ENDPOINT, headers = headers, data = json.dumps(data))
+    print(r.content)
+
+
+def set_persistent_menu():
+    headers = {
+        'Content-Type':'application/json'
+        }
+    data = {
+        "setting_type":"call_to_actions",
+        "thread_state" : "existing_thread",
+        "call_to_actions":[
+            {
+                "type":"web_url",
+                "title":"View Website",
+                "url":"http://codingblocks.com/" 
+            },
+            {
+                "type":"web_url",
+                "title":"Enroll now!",
+                "url":"http://students.codingblocks.xyz/purchasable_course"
+            },
+            {
+                "type":"web_url",
+                "title":"Register",
+                "url":"http://codingblocks.com/signup/"
+            }]
+        }
+    ENDPOINT = "https://graph.facebook.com/v2.6/me/thread_settings?access_token=%s"%(FB_ACCESS_TOKEN)
+    r = requests.post(ENDPOINT, headers = headers, data = json.dumps(data))
+    print(r.content)
+
+
+
+
 if __name__ == "__main__":
+	set_greeting_text()
 	app.run(port=8000, use_reloader = True)
+
 
 """
 buttons = [{"type":"web_url","url":"https://www.facebook.com/Mycodebot-1293905183961696/","title":"Visit our page"}]
